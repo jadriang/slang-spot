@@ -38,3 +38,7 @@ export async function updateLikes(slangId: string, numIncrement: number): Promis
   })
 }
 
+export async function addSlangTerm(slang: SlangTerm): Promise<void> {
+  const slangRef = collection(db, 'slangTerms')
+  await setDoc(doc(slangRef), slang)
+}

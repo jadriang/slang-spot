@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,22 +10,23 @@ import { Heart, Share2, Facebook, Twitter, LinkedinIcon as LinkedIn } from 'luci
 import { getSlangTerm, incrementSlangVisits, updateLikes } from '@/lib/firebase-utils'
 import { SlangTerm } from '@/types/slang'
 
-export default function SlangDetail({ params }: { params: { id: string } }) {
+export default function SlangDetail({ params }: { params: Promise<{ id: string }> }) {
   const [slang, setSlang] = useState<SlangTerm | null>(null)
   const [isLiked, setIsLiked] = useState(false)
+  const unwrappedParams = use(params)
 
   useEffect(() => {
     const fetchSlang = async () => {
-      const fetchedSlang = await getSlangTerm(params.id)
+      const fetchedSlang = await getSlangTerm(unwrappedParams.id)
       if (fetchedSlang) {
         setSlang(fetchedSlang)
-        incrementSlangVisits(params.id)
+        incrementSlangVisits(unwrappedParams.id)
       } else {
         notFound()
       }
     }
     fetchSlang()
-  }, [params.id])
+  }, [unwrappedParams.id])
 
   if (!slang) {
     return <div>Loading...</div>
@@ -33,13 +34,13 @@ export default function SlangDetail({ params }: { params: { id: string } }) {
 
   const handleLike = async () => {
     const incrementValue = isLiked ? -1 : 1
-    await updateLikes(params.id, incrementValue)
+    await updateLikes(unwrappedParams.id, incrementValue)
     setSlang(prev => prev ? { ...prev, likes: prev.likes + incrementValue } : null)
     setIsLiked(!isLiked)
   }
 
   const handleShare = (platform: string) => {
-    const url = `https://slang-explorer.com/slang/${params.id}`
+    const url = `https://slang-explorer.com/slang/${unwrappedParams.id}`
     const text = `Check out the meaning of "${slang.term}" on Slang Explorer!`
     let shareUrl = ''
 
@@ -108,17 +109,24 @@ export default function SlangDetail({ params }: { params: { id: string } }) {
         </CardContent>
       </Card>
 
-      <h2 className="text-2xl font-bold mb-4">Comments</h2>
-      <div className="space-y-4">
-        {slang.comments.map((comment, index) => (
-          <Card key={index}>
-            <CardContent className="pt-4">
-              <p className="font-semibold">{comment.user}</p>
-              <p>{comment.comment}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {slang.comments && slang.comments.length > 0 ? (
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Comments</h2>
+          <div className="space-y-4">
+            {slang.comments.map((comment, index) => (
+              <Card key={index}>
+                <CardContent className="pt-4">
+                  <p className="font-semibold">{comment.user}</p>
+                  <p>{comment.comment}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+      ) : (
+        <div>No comments available</div>
+      )}
     </div>
   )
 }
