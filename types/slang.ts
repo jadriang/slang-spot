@@ -22,3 +22,10 @@ export interface TopVisitedSlang {
   visits: number;
 }
 
+export interface SlangSubmission {
+  term: string;
+  meaning: string;
+  category: string;
+  example: string;
+  tags: string[];
+}

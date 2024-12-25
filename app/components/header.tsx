@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import AuthButton from './auth-button'
 
 export default function Header() {
   return (
@@ -11,6 +11,7 @@ export default function Header() {
             <li><Link href="/slang-list" className="hover:underline">Slang List</Link></li>
             <li><Link href="/about" className="hover:underline">About</Link></li>
             <li><Link href="/submit" className="hover:underline">Submit Slang</Link></li>
+            <li><AuthButton /></li>
           </ul>
         </nav>
       </div>
